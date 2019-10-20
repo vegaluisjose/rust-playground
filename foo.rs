@@ -15,7 +15,7 @@ enum Expr {
     Main(String, Box<Expr>)
 }
 
-fn eval(expr: Expr) -> String {
+fn emit(expr: Expr) -> String {
     use Expr::*;
     match expr {
         Module(n) => format!("{}", n),
@@ -29,13 +29,11 @@ fn main() {
     // data.push('\n');
     // data.push_str("new line");
     // println!("string: {}", data);
-    // emit(data, path);
-    // let tmp = eval(Expr::Clock(String::from("Luis")));
     let p = String::from("mod");
     let q = String::from("mod");
     let m = Box::new(Expr::Module(p));
     let x = Expr::Main(String::from(q), m);
-    let t = eval(x);
+    let t = emit(x);
     println!("{}", t);
     // println!("{}", tmp);
 }
