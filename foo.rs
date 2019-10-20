@@ -16,16 +16,16 @@ enum Expr {
 fn emit(expr: &Expr) -> String {
     use Expr::*;
     match expr {
-        Module(n) => format!("  module {}:\n    skip", n),
+        Module(n) => format!("  module {}:\n", n),
         Main(n, m) => format!("circuit {}:\n{}", n, emit(m))
     }
 }
 
 fn main() {
-    let p = String::from("foo");
-    let q = String::from("foo");
-    let m = Box::new(Expr::Module(p));
-    let x = Expr::Main(String::from(q), m);
+    let s = String::from("foo");
+    let t = s.clone();
+    let m = Box::new(Expr::Module(s));
+    let x = Expr::Main(t, m);
     let prog = emit(&x);
     let path = String::from("foo.fir");
     println!("{}", prog);
