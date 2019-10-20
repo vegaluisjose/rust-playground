@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
-fn write(prog: String, path: String) {
+fn write(prog: &str, path: &str) {
     let f = File::create(path).expect("Unable to create file");
     let mut buf = BufWriter::new(f);
     buf.write_all(prog.as_bytes()).expect("Unable to write data");
@@ -33,7 +33,7 @@ fn main() {
     let module = Box::new(Expr::Module(s, clock));
     let top = Expr::Main(t, module);
     let prog = emit(&top);
-    let path = String::from("foo.fir");
+    let path = "foo.fir";
     println!("{}", prog);
-    write(prog, path);
+    write(&prog, &path);
 }
