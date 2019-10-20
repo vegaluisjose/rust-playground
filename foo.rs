@@ -13,11 +13,19 @@ enum Expr {
     Main(String, Box<Expr>)
 }
 
+fn new_line() -> String { String::from("\n") }
+
+fn indent(n: usize, s: String) -> String {
+    let i = format!("{s:>w$}", s=String::from(""), w=n);
+    let is = format!("{}{}", i, s);
+    is
+}
+
 fn emit(expr: &Expr) -> String {
     use Expr::*;
     match expr {
-        Module(n) => format!("  module {}:\n", n),
-        Main(n, m) => format!("circuit {}:\n{}", n, emit(m))
+        Module(n) => indent(2, format!("module {}:", n)),
+        Main(n, m) => indent(0, format!("circuit {}:{}{}", n, new_line(), emit(m)))
     }
 }
 
