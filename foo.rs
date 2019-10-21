@@ -13,16 +13,6 @@ enum Expr {
     Module { name: String, port: Vec<Box<Expr>> },
 }
 
-// fn my_func(s: &str, n: i8) -> String { format!("{}-->{}\n", s, n) }
-
-// fn main() {
-//     let x = String::from("hello");
-//     let v = vec![1, 2, 3];
-//     let mut y = String::new();
-//     for i in v { y.push_str(&my_func(&x, i)) }
-//     println!("{}", y);
-// }
-
 fn new_line() -> String { String::from("\n") }
 fn indent(n: usize) -> String { format!("{s:>w$}", s=String::from(""), w=n) }
 
