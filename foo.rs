@@ -11,6 +11,7 @@ fn write(prog: &str, path: &str) {
 enum Expr {
     Clock { name: String },
     Module { name: String, port: Vec<Box<Expr>> },
+    Main { name: String, module: Vec<Box<Expr>> },
 }
 
 fn new_line() -> String { String::from("\n") }
@@ -25,15 +26,19 @@ fn emit(expr: &Expr) -> String {
             for i in port { p.push_str(&emit(&i)) }
             format!("{}module {}:{}{}", indent(2), name, new_line(), p)
         },
+        Main { name, module } => {
+            let mut m = String::new();
+            for i in module { m.push_str(&emit(&i)) }
+            format!("{}circuit {}:{}{}", indent(0), name, new_line(), m)
+        },
     }
 }
 
 fn main() {
     let clock = vec![Box::new(Expr::Clock { name: "clk".into() })];
-    let module = Box::new(Expr::Module { name: "foo".into(), port: clock });
-    let prog = emit(&module);
-    // let top = Expr::Main(t, module);
-    // let prog = emit(&top);
+    let module = vec![Box::new(Expr::Module { name: "foo".into(), port: clock })];
+    let top = Box::new(Expr::Main { name: "foo".into(), module: module });
+    let prog = emit(&top);
     let path = "foo.fir";
     println!("{}", prog);
     write(&prog, &path);
