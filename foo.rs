@@ -12,6 +12,9 @@ fn write(prog: &str, path: &str) {
 enum Expr {
     In,
     Out,
+    ClockType,
+    ResetType,
+    Bits { width: i32 },
     Clock { name: String },
     Reset { name: String },
     ResetLow { name: String },
@@ -27,14 +30,17 @@ fn emit(expr: &Expr) -> String {
     match expr {
         In => { format!("input") },
         Out => { format!("output") },
+        Bits { width } => { format!("UInt<{}>", width) },
+        ClockType => { format!("Clock") },
+        ResetType => { emit(&Bits{ width: 1 }) },
         Clock { name } => {
-            format!("{}{} {}: Clock{}", indent(4), emit(&In), name, new_line())
+            format!("{}{} {}: {}{}", indent(4), emit(&In), name, emit(&ClockType), new_line())
         },
         Reset { name } => {
-            format!("{}{} {}: UInt<1>{}", indent(4), emit(&In), name, new_line())
+            format!("{}{} {}: {}{}", indent(4), emit(&In), name, emit(&ResetType), new_line())
         },
         ResetLow { name } => {
-            format!("{}{} {}: UInt<1>{}", indent(4), emit(&In), name, new_line())
+            format!("{}{} {}: {}{}", indent(4), emit(&In), name, emit(&ResetType), new_line())
         },
         Module { name, io } => {
             let mut p = String::new();
