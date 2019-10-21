@@ -9,10 +9,19 @@ fn write(prog: &str, path: &str) {
 
 #[derive(PartialEq, Hash, Debug)]
 enum Expr {
-    Clock(String),
-    Module(String, Box<Expr>),
-    Main(String, Box<Expr>)
+    Clock { name: String },
+    Module { name: String, port: Vec<Box<Expr>> },
 }
+
+// fn my_func(s: &str, n: i8) -> String { format!("{}-->{}\n", s, n) }
+
+// fn main() {
+//     let x = String::from("hello");
+//     let v = vec![1, 2, 3];
+//     let mut y = String::new();
+//     for i in v { y.push_str(&my_func(&x, i)) }
+//     println!("{}", y);
+// }
 
 fn new_line() -> String { String::from("\n") }
 fn indent(n: usize) -> String { format!("{s:>w$}", s=String::from(""), w=n) }
@@ -20,19 +29,21 @@ fn indent(n: usize) -> String { format!("{s:>w$}", s=String::from(""), w=n) }
 fn emit(expr: &Expr) -> String {
     use Expr::*;
     match expr {
-        Clock(n) => format!("{}input {}: Clock", indent(4), n),
-        Module(n, m) => format!("{}module {}:{}{}", indent(2), n, new_line(), emit(m)),
-        Main(n, m) => format!("{}circuit {}:{}{}", indent(0), n, new_line(), emit(m))
+        Clock { name } => format!("{}input {}: Clock{}", indent(4), name, new_line()),
+        Module { name, port } => {
+            let mut p = String::new();
+            for i in port { p.push_str(&emit(&i)) }
+            format!("{}module {}:{}{}", indent(2), name, new_line(), p)
+        },
     }
 }
 
 fn main() {
-    let s = String::from("foo");
-    let t = s.clone();
-    let clock = Box::new(Expr::Clock(String::from("clk")));
-    let module = Box::new(Expr::Module(s, clock));
-    let top = Expr::Main(t, module);
-    let prog = emit(&top);
+    let clock = vec![Box::new(Expr::Clock { name: "clk".into() })];
+    let module = Box::new(Expr::Module { name: "foo".into(), port: clock });
+    let prog = emit(&module);
+    // let top = Expr::Main(t, module);
+    // let prog = emit(&top);
     let path = "foo.fir";
     println!("{}", prog);
     write(&prog, &path);
