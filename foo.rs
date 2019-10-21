@@ -8,8 +8,11 @@ fn write(prog: &str, path: &str) {
 }
 
 #[derive(PartialEq, Hash, Debug)]
+#[allow(dead_code)]
 enum Expr {
     Clock { name: String },
+    Reset { name: String },
+    ResetLow { name: String },
     Module { name: String, port: Vec<Box<Expr>> },
     Main { name: String, module: Vec<Box<Expr>> },
 }
@@ -21,6 +24,8 @@ fn emit(expr: &Expr) -> String {
     use Expr::*;
     match expr {
         Clock { name } => format!("{}input {}: Clock{}", indent(4), name, new_line()),
+        Reset { name } => format!("{}input {}: UInt<1>{}", indent(4), name, new_line()),
+        ResetLow { name } => format!("{}input {}: UInt<1>{}", indent(4), name, new_line()),
         Module { name, port } => {
             let mut p = String::new();
             for i in port { p.push_str(&emit(&i)) }
@@ -35,8 +40,8 @@ fn emit(expr: &Expr) -> String {
 }
 
 fn main() {
-    let clock = vec![Box::new(Expr::Clock { name: "clk".into() })];
-    let module = vec![Box::new(Expr::Module { name: "foo".into(), port: clock })];
+    let port = vec![Box::new(Expr::Clock { name: "clk".into() }), Box::new(Expr::Reset { name: "rst".into() })];
+    let module = vec![Box::new(Expr::Module { name: "foo".into(), port: port })];
     let top = Box::new(Expr::Main { name: "foo".into(), module: module });
     let prog = emit(&top);
     let path = "foo.fir";
