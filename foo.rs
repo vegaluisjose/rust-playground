@@ -15,6 +15,8 @@ enum Expr {
     ClockType,
     ResetType,
     Bits { width: i32 },
+    Field { name: String, dir: Box<Expr>, bits: Box<Expr> },
+    Bus { name: String, field: Vec<Box<Expr>> },
     Clock { name: String },
     Reset { name: String },
     ResetLow { name: String },
@@ -41,6 +43,19 @@ fn emit(expr: &Expr) -> String {
         },
         ResetLow { name } => {
             format!("{}{} {}: {}{}", indent(4), emit(&In), name, emit(&ResetType), new_line())
+        },
+        Field { name, dir, bits } => {
+            format!("{}{}: {}{}", emit(&dir), name, emit(&bits), new_line())
+        },
+        Bus { name, field } => {
+            let mut p = String::new();
+            for i in field {
+                if !name.is_empty() {
+                    p.push_str(&format!("{}_{}", indent(4), name));
+                }
+                p.push_str(&emit(&i));
+            }
+            format!("{}", p)
         },
         Module { name, io } => {
             let mut p = String::new();
