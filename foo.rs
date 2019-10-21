@@ -10,6 +10,8 @@ fn write(prog: &str, path: &str) {
 #[derive(PartialEq, Hash, Debug)]
 #[allow(dead_code)]
 enum Expr {
+    In,
+    Out,
     Clock { name: String },
     Reset { name: String },
     ResetLow { name: String },
@@ -23,14 +25,16 @@ fn indent(n: usize) -> String { format!("{s:>w$}", s=String::from(""), w=n) }
 fn emit(expr: &Expr) -> String {
     use Expr::*;
     match expr {
+        In => { format!("input") },
+        Out => { format!("output") },
         Clock { name } => {
-            format!("{}input {}: Clock{}", indent(4), name, new_line())
+            format!("{}{} {}: Clock{}", indent(4), emit(&In), name, new_line())
         },
         Reset { name } => {
-            format!("{}input {}: UInt<1>{}", indent(4), name, new_line())
+            format!("{}{} {}: UInt<1>{}", indent(4), emit(&In), name, new_line())
         },
         ResetLow { name } => {
-            format!("{}input {}: UInt<1>{}", indent(4), name, new_line())
+            format!("{}{} {}: UInt<1>{}", indent(4), emit(&In), name, new_line())
         },
         Module { name, io } => {
             let mut p = String::new();
