@@ -112,6 +112,18 @@ impl Net {
     pub fn port(&self) -> &Vec<PortRef> {
         &self.port
     }
+    pub fn add_port<S>(&mut self, name: S)
+    where
+        S: AsRef<str>,
+    {
+        self.port.push(PortRef::new(name))
+    }
+    pub fn add_port_with_instance<S>(&mut self, name: S, instance: S)
+    where
+        S: AsRef<str>,
+    {
+        self.port.push(PortRef::new_with_instance(name, instance))
+    }
 }
 
 fn symbol_from_str<S: AsRef<str>>(val: S) -> Value {
@@ -202,8 +214,26 @@ mod tests {
     }
     #[test]
     fn test_net_with_portref() {
-        let res = Net::new("p_1_in");
-        let exp = String::from("(net p_1_in)");
+        let mut res = Net::new("p_1_in");
+        res.add_port("CLK");
+        let exp = String::from("(net p_1_in (joined (portref CLK)))");
+        assert_eq!(res.to_string(), exp)
+    }
+    #[test]
+    fn test_net_with_portref_with_instance() {
+        let mut res = Net::new("BUF");
+        res.add_port_with_instance("I0", "i0");
+        let exp = String::from("(net BUF (joined (portref I0 (instanceref i0))))");
+        assert_eq!(res.to_string(), exp)
+    }
+    #[test]
+    fn test_net_with_two_portref() {
+        let mut res = Net::new("BUF");
+        res.add_port_with_instance("I0", "i0");
+        res.add_port_with_instance("I1", "i1");
+        let exp = String::from(
+            "(net BUF (joined (portref I0 (instanceref i0)) (portref I1 (instanceref i1))))",
+        );
         assert_eq!(res.to_string(), exp)
     }
 }
