@@ -17,9 +17,10 @@ pub struct PortRef {
     pub instance: Option<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct Net {
     pub name: Name,
+    pub port: Vec<PortRef>,
 }
 
 // we could use a macro for Display impl?
@@ -95,6 +96,24 @@ impl PortRef {
     }
 }
 
+impl Net {
+    pub fn new<S>(name: S) -> Self
+    where
+        S: AsRef<str>,
+    {
+        Net {
+            name: Name::new(name),
+            port: Vec::new(),
+        }
+    }
+    pub fn name(&self) -> &Name {
+        &self.name
+    }
+    pub fn port(&self) -> &Vec<PortRef> {
+        &self.port
+    }
+}
+
 fn symbol_from_str<S: AsRef<str>>(val: S) -> Value {
     let v = val.as_ref().to_string();
     Value::symbol(v.into_boxed_str())
@@ -116,7 +135,18 @@ impl ToValue for Name {
 impl ToValue for Net {
     fn to_value(&self) -> Value {
         let net = symbol_from_str("net");
-        Value::list(vec![net, self.name.to_value()])
+        let val = self.name().to_value();
+        if self.port().is_empty() {
+            Value::list(vec![net, val])
+        } else {
+            let mut port: Vec<Value> = Vec::new();
+            port.push(symbol_from_str("joined"));
+            for p in self.port() {
+                port.push(p.to_value());
+            }
+            let prf = Value::list(port);
+            Value::list(vec![net, val, prf])
+        }
     }
 }
 
@@ -140,25 +170,40 @@ pub fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
     fn test_name() {
         let res = Name::new("CLOCK");
         let exp = String::from("CLOCK");
         assert_eq!(res.to_string(), exp)
     }
-
     #[test]
     fn test_name_with_rename() {
         let res = Name::new_with_rename("CLOCK", "A[0]");
         let exp = String::from(r#"(rename CLOCK "A[0]")"#);
         assert_eq!(res.to_string(), exp)
     }
-
     #[test]
     fn test_portref() {
         let res = PortRef::new("CE");
         let exp = String::from("(portref CE)");
+        assert_eq!(res.to_string(), exp)
+    }
+    #[test]
+    fn test_portref_with_instance() {
+        let res = PortRef::new_with_instance("C", "x_reg_0_");
+        let exp = String::from("(portref C (instanceref x_reg_0_))");
+        assert_eq!(res.to_string(), exp)
+    }
+    #[test]
+    fn test_net() {
+        let res = Net::new("p_1_in");
+        let exp = String::from("(net p_1_in)");
+        assert_eq!(res.to_string(), exp)
+    }
+    #[test]
+    fn test_net_with_portref() {
+        let res = Net::new("p_1_in");
+        let exp = String::from("(net p_1_in)");
         assert_eq!(res.to_string(), exp)
     }
 }
