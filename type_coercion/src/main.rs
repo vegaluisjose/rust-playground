@@ -22,7 +22,6 @@ pub enum Val {
     Bar(Bar),
 }
 
-
 #[derive(Clone, Debug)]
 pub struct Rec {
     val: Val,
@@ -38,12 +37,11 @@ impl Rec {
     // get converted to Val
     pub fn set_val<V>(&mut self, val: V)
     where
-        V: Into<Val>
+        V: Into<Val>,
     {
         self.val = val.into();
     }
 }
-
 
 fn main() {
     let mut rec = Rec::new();
