@@ -1,0 +1,10 @@
+[package]
+name = "example"
+version = "0.1.0"
+authors = ["Luis Vega <vegaluisjose@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+derive_more = { version = "0.99.0", features = ["deref", "deref_mut"] }
