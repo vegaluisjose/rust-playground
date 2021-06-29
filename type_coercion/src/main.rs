@@ -50,4 +50,6 @@ fn main() {
     println!("{:?}", &rec);
     rec.set_val(Foo);
     println!("{:?}", &rec);
+    rec.set_val(Val::Bar(Bar));
+    println!("{:?}", &rec);
 }
